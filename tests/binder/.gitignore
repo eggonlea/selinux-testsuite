@@ -3,3 +3,4 @@ check_binderfs
 manager
 service_provider
 client
+setup_report

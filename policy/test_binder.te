@@ -94,3 +94,27 @@ allow test_binder_client_no_transfer_t test_binder_mgr_t:binder { call };
 allow test_binder_client_no_transfer_t test_binder_provider_t:binder { call impersonate };
 allow test_binder_client_no_transfer_t device_t:chr_file { getattr ioctl open read write };
 allow_map(test_binder_client_no_transfer_t, device_t, chr_file)
+
+#
+################################## Report ###################################
+#
+type test_binder_report_t;
+testsuite_domain_type(test_binder_report_t)
+typeattribute test_binder_report_t binderdomain;
+allow test_binder_report_t self:netlink_generic_socket { create bind read write };
+allow test_binder_report_t self:binder { setup_report };
+
+#
+######################### Report No Generic Netlink #########################
+#
+type test_binder_report_no_genl_t;
+testsuite_domain_type(test_binder_report_no_genl_t)
+typeattribute test_binder_report_no_genl_t binderdomain;
+
+#
+############################# Report No set up ##############################
+#
+type test_binder_report_no_setup_t;
+testsuite_domain_type(test_binder_report_no_setup_t)
+typeattribute test_binder_report_no_setup_t binderdomain;
+allow test_binder_report_no_setup_t self:netlink_generic_socket { create bind read write };

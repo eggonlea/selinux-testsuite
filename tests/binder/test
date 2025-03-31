@@ -7,6 +7,7 @@ BEGIN {
 
     $test_count      = 0;
     $test_binder_ctx = 0;
+    $test_binder_transaction_report = 0;
 
     # Allow binder info to be shown.
     $v = $ARGV[0];
@@ -57,6 +58,16 @@ BEGIN {
         $test_binder_ctx = 1;
         $test_count += 8;
         $n = "-n";                   # Use /dev/binder-test
+
+        # Check transaction_report feature
+        open my $fh, '<', '/dev/binderfs/features/transaction_report' or warn $!;
+        chomp( my $feature = <$fh> );
+        $test_binder_transaction_report = int($feature);
+        if ( $test_binder_transaction_report eq 0 ) {
+            print "Binder feature transaction report not supported\n";
+        } else {
+            $test_count += 3;
+        }
     }
     elsif ( $result >> 8 eq 3 ) {    # BINDER_VER_ERROR
         plan skip_all => "Binder kernel/userspace versions differ";
@@ -175,6 +186,27 @@ if ($test_binder_ctx) {
     # Kill the service provider & manager.
     service_end( "service_provider", $sp_pid );
     service_end( "manager",          $sm_pid );
+
+# 9 Verify that authorized process can send generic netlink command to set up binder reports.
+    if ($test_binder_transaction_report) {
+        $result = system "runcon -t test_binder_report_t $basedir/setup_report $v";
+        $ret8 = $result >> 8;
+        ok( $result eq 0 );
+    }
+
+# 10 Verify that unauthorized process can't use generic netlink socket (no genetlink perm).
+    if ($test_binder_transaction_report) {
+        $result = system "runcon -t test_binder_report_no_genl_t $basedir/setup_report $v";
+        $ret8 = $result >> 8;
+        ok( $result >> 8 eq 151 );
+    }
+
+# 11 Verify that unauthorized process can't use setup_report command (no setup_report perm).
+    if ($test_binder_transaction_report) {
+        $result = system "runcon -t test_binder_report_no_setup_t $basedir/setup_report $v";
+        $ret8 = $result >> 8;
+        ok( $result >> 8 eq 158 );
+    }
 
     # Cleanup binderfs stuff.
     system("/bin/sh $basedir/cleanup_binder.sh $v 2>/dev/null");

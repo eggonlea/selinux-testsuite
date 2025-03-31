@@ -1,7 +1,7 @@
 # Required for local building
 INCLUDEDIR ?= /usr/include
 
-TARGETS = check_binder client manager service_provider
+TARGETS = check_binder client manager service_provider setup_report
 LDLIBS += -lselinux -lrt
 DEPS = binder_common.c binder_common.h
 
