@@ -5,6 +5,13 @@
     filter: tag:-ci
   execute:
     how: tmt
+  provision:
+    how: virtual
+    hardware:
+      cpu:
+        processors: 32
+    memory: 16 GB
+    disk: 100 GB
 /run-ci:
   summary: Run the CI for the testsuite
   tag: [ci]
